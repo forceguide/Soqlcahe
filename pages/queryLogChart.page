@@ -1,0 +1,7 @@
+<apex:page standardController="Query_Run__c" extensions="chartController" >
+	
+	
+    <!-- Call the series chart componenet -->
+	<c:seriesChart ApexLogs="{!apexLogsList}" QueryRun="{!Query_Run__c}" /> 
+	
+</apex:page>

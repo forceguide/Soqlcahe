@@ -1,0 +1,24 @@
+<apex:page controller="chartController" showHeader="true" sidebar="true">
+	<apex:sectionHeader subtitle="Soql Response Graph" />
+
+	<apex:form >
+		<apex:pageBlock mode="mainDetail" >
+			<apex:pageBlockSection columns="1" collapsible="false" >
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Select Run time" />
+					<apex:selectList value="{!queryrunId}" size="1" multiselect="false" >
+						<apex:selectOption itemValue="" itemLabel="--None--" />
+						<apex:selectOptions value="{!QueryRuns}" />
+						<apex:actionSupport event="onchange" action="{!getQueryLogs}" rerender="chartPanel" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+
+			<!--Chart Panel -->
+			<apex:outputPanel layout="block" id="chartPanel" >
+				<!-- Call the series chart componenet -->
+				<c:seriesChart ApexLogs="{!apexLogsList}" QueryRun="{!queryRun}" />
+			</apex:outputPanel>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

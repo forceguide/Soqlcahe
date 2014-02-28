@@ -1,0 +1,133 @@
+<apex:component >
+	<!--Javascript Libraries --> 
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" />
+	<apex:includeScript value="{!URLFOR($Resource.Stockcharts, 'Stockcharts/highstock.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.Stockcharts, 'Stockcharts/modules/exporting.js')}" />
+
+	<apex:attribute name="ApexLogs" description="list of apex logs" type="Apex_Log__c[]" required="true" />
+	<apex:attribute name="QueryRun" description="Query Run Information" type="Query_Run__c" required="true" /> 
+
+	<!-- apex variable -->
+	<apex:variable value="0" var="counter" />
+
+	<script type="text/javascript" >
+		var counter = 0;
+		var increment = false;
+		var chartColour = '{!$Setup.QueryLogger__c.Chart_Colour__c}';
+		$(function () {
+		 	$('#container').highcharts({
+		 		chart: {            
+	                type: 'column'
+	            },
+	            title: {
+	            	text: '<apex:outputText value="{0,date, dd MMMMM yyyy 'at' HH:mm:ss z}" >
+                    		  <apex:param value="{!QueryRun.Run_Time__c}" />
+                    	   </apex:outputText>'
+	            },
+	            xAxis: {
+	            	title: { 
+	                    text: 'Query'
+	                },
+	                type: 'category',
+	                min : 4,
+	                range : {!ApexLogs.size}
+	            }, 
+	            yAxis: {
+	                title: { 
+	                    text: 'Number of milliseconds'
+	                },            
+	            }, 
+	            scrollbar: {
+		            enabled: true,
+		            barBackgroundColor: 'gray',
+		            barBorderRadius: 7,
+		            barBorderWidth: 0,
+		            buttonBackgroundColor: 'gray',
+		            buttonBorderWidth: 0,
+		            buttonArrowColor: 'yellow',
+		            buttonBorderRadius: 7,
+		            rifleColor: 'yellow',
+		            trackBackgroundColor: 'white',
+		            trackBorderWidth: 1,
+		            trackBorderColor: 'silver',
+		            trackBorderRadius: 7
+		                        
+		        },
+		        navigator: {
+		            enabled: true,
+		            height: 18                                                  
+		        },
+		        credits : {
+                    enabled : false
+                },
+                legend : {
+                    title : {
+                        text : ''
+                    }
+                },
+		        plotOptions: {
+	                series: {
+	                    cursor: 'pointer',
+	                    point: {
+	                        events: {
+	                            click: function() {
+	                                window.open( this.options.url , '_blank');
+	                            }
+	                        }
+	                    }
+	                }
+	            },
+	            tooltip: {
+                    hideDelay : 0,
+                    formatter: function() {
+	                    return '<table align="right" style="z-index:100;"  >'+
+	                                '<tr>'+
+	                                    '<td style="font-size:9px;"><b>'+
+	                                        this.point.name+
+	                                    '</b></td><br />'+
+	                                '</tr>'+
+	                                '<tr>'+
+	                                    '<td style="font-size:9px;"><b>'+
+	                                       this.y+' milliseconds'+
+	                                    '</b></td>'+
+	                                '</tr>'+
+	                            '</table>';
+       
+                    }
+                },
+                series: [{
+                	name : 'Query',
+	                data: [
+	                    <apex:repeat value="{!ApexLogs}" var="apexlog" >
+	                    {
+	                        name:  '{!apexlog.Query__r.Name}',
+	                        color:  (chartColour == '' ? '#36A82C' : chartColour),
+	                        x:  incrementCounter(counter), 
+	                        y:  {!apexlog.Response_Time__c},
+	                        url: '/{!apexlog.Id}' 
+	                    },  
+	                    </apex:repeat>
+	                ] 
+	            }]
+	            ,
+	            navigation: {
+	                menuItemStyle: {
+	                    fontSize: '10px'
+	                }
+	            }
+		 	});
+		});
+		
+		// Increment the x-axis value
+		function incrementCounter(countervalue){
+			counter = (counter == 0 && !increment ? counter : (counter + 1));
+			increment = true;
+			return counter;
+		}
+	</script>
+
+	<!--Div to show the chart -->
+	<apex:outputPanel layout="none" >
+		<div id="container" style="height: 400px; margin: 0 auto; display:{!IF(ApexLogs.size > 0 , '', 'none')}"></div> 
+	</apex:outputPanel>
+</apex:component>
